@@ -45,13 +45,16 @@ public class OrderRepository {
         return "Added";
     }
     public Order getOrderById(String orderId){
-        return orderDB.get(orderId);
+        return orderDB.getOrDefault(orderId, null);
     }
     public DeliveryPartner getPartnerById(String partnerId){
-        return partnerDB.get(partnerId);
+        return partnerDB.getOrDefault(partnerId, null);
     }
     public int getOrderCountByPartnerId(String partnerId){
-        return partnerDB.get(partnerId).getNumberOfOrders();
+        if(partnerDB.containsKey(partnerId)){
+            return partnerDB.get(partnerId).getNumberOfOrders();
+        }
+        return 0;
     }
     public List<String> getOrdersByPartnerId(String partnerId){
         DeliveryPartner deliveryPartner=partnerDB.get(partnerId);
