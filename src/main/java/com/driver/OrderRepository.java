@@ -110,8 +110,10 @@ public class OrderRepository {
     }
     public String deletePartnerById(String partnerId){
         partnerDB.remove(partnerId);
-        orders+=partnerOrderDB.get(partnerId).size();
-        partnerOrderDB.remove(partnerId);
+        if(partnerOrderDB.containsKey(partnerId)){
+            orders+=partnerOrderDB.get(partnerId).size();
+            partnerOrderDB.remove(partnerId);
+        }
         return "Deleted";
     }
     public String deleteOrderById(String orderId){
