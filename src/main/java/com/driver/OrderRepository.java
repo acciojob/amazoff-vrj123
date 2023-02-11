@@ -73,7 +73,7 @@ public class OrderRepository {
     }
     public int getOrdersLeftAfterGivenTimeByPartnerId(String time, String partnerId){
         int h=Integer.valueOf(time.substring(0, 2));
-        int m=Integer.valueOf(time.substring(2));
+        int m=Integer.valueOf(time.substring(3));
         int t=h*60+m, count=0;
         DeliveryPartner deliveryPartner=partnerDB.get(partnerId);
         List<String> order=partnerOrderDB.get(partnerId);
