@@ -11,7 +11,7 @@ public class Order {
         //deliveryTime  = HH*60 + MM
         this.id=id;
         int h=Integer.valueOf(deliveryTime.substring(0, 2));
-        int m=Integer.valueOf(deliveryTime.substring(2));
+        int m=Integer.valueOf(deliveryTime.substring(3));
         this.deliveryTime=h*60+m;
     }
 
