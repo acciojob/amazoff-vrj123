@@ -11,7 +11,7 @@ import java.util.Map;
 @Repository
 public class OrderRepository {
 
-    Map<DeliveryPartner, List<Order>> partnerOrderDB;
+    Map<String, List<String>> partnerOrderDB;
     Map<String, Order> orderDB;
     Map<String, DeliveryPartner> partnerDB;
     int orders;
@@ -31,17 +31,16 @@ public class OrderRepository {
     public String addPartner(String id){
         DeliveryPartner deliveryPartner=new DeliveryPartner(id);
         partnerDB.put(id, deliveryPartner);
-        partnerOrderDB.put(deliveryPartner, new ArrayList<>());
+        partnerOrderDB.put(id, new ArrayList<>());
         return "Added";
     }
     public String addOrderPartnerPair(String orderId, String partnerId){
-        DeliveryPartner deliveryPartner=partnerDB.get(partnerId);
-        int count=deliveryPartner.getNumberOfOrders();
-        deliveryPartner.setNumberOfOrders(count+1);
-        partnerDB.put(partnerId, deliveryPartner);
+//        DeliveryPartner deliveryPartner=partnerDB.get(partnerId);
+//        int count=deliveryPartner.getNumberOfOrders();
+//        deliveryPartner.setNumberOfOrders(count+1);
+//        partnerDB.put(partnerId, deliveryPartner);
+        partnerOrderDB.get(partnerId).add(orderId);
         orders--;
-        Order order=orderDB.get(orderId);
-        partnerOrderDB.get(deliveryPartner).add(order);
         return "Added";
     }
     public Order getOrderById(String orderId){
@@ -51,18 +50,16 @@ public class OrderRepository {
         return partnerDB.getOrDefault(partnerId, null);
     }
     public int getOrderCountByPartnerId(String partnerId){
-        if(partnerDB.containsKey(partnerId)){
-            return partnerDB.get(partnerId).getNumberOfOrders();
+        if(partnerOrderDB.containsKey(partnerId)){
+            return partnerOrderDB.get(partnerId).size();
         }
         return 0;
     }
     public List<String> getOrdersByPartnerId(String partnerId){
-        DeliveryPartner deliveryPartner=partnerDB.get(partnerId);
-        List<String> order=new ArrayList<>();
-        for(Order o:partnerOrderDB.get(deliveryPartner)){
-            order.add(o.getId());
+        if (partnerOrderDB.containsKey(partnerId)){
+            return partnerOrderDB.get(partnerId);
         }
-        return order;
+        return new ArrayList<>();
     }
     public List<String> getAllOrders(){
         List<String> orderList=new ArrayList<>();
@@ -79,20 +76,19 @@ public class OrderRepository {
         int m=Integer.valueOf(time.substring(2));
         int t=h*60+m, count=0;
         DeliveryPartner deliveryPartner=partnerDB.get(partnerId);
-        List<Order> orderList=partnerOrderDB.get(deliveryPartner);
-        for(Order order:orderList){
-            if(order.getDeliveryTime()>t){
+        List<String> order=partnerOrderDB.get(partnerId);
+        for(String o:order){
+            if (orderDB.get(o).getDeliveryTime()>t){
                 count++;
             }
         }
         return count;
     }
     public String getLastDeliveryTimeByPartnerId(String partnerId){
-        DeliveryPartner deliveryPartner=partnerDB.get(partnerId);
-        List<Order> orderList=partnerOrderDB.get(deliveryPartner);
+        List<String> orderList=partnerOrderDB.get(partnerId);
         int time=0;
-        for(Order order:orderList){
-            time=Math.max(time, order.getDeliveryTime());
+        for(String order:orderList){
+            time=Math.max(time, orderDB.get(order).getDeliveryTime());
         }
         int h=time/60;
         String HH="";
@@ -113,30 +109,26 @@ public class OrderRepository {
         return HH+":"+MM;
     }
     public String deletePartnerById(String partnerId){
-        DeliveryPartner deliveryPartner=partnerDB.get(partnerId);
         partnerDB.remove(partnerId);
-        orders+=partnerOrderDB.get(deliveryPartner).size();
-        partnerOrderDB.remove(deliveryPartner);
+        orders+=partnerOrderDB.get(partnerId).size();
+        partnerOrderDB.remove(partnerId);
         return "Deleted";
     }
     public String deleteOrderById(String orderId){
-        DeliveryPartner deliveryPartner=null;
-        Order o=null;
-        for(DeliveryPartner k:partnerOrderDB.keySet()){
-            for (Order order:partnerOrderDB.get(k)){
-                if(order.getId()==orderId){
-                    o=order;
-                    deliveryPartner=k;
-                    break;
-                }
-            }
-        }
-        if (deliveryPartner!=null){
-            partnerOrderDB.get(deliveryPartner).remove(o);
-        }
-        else{
-            orders--;
-        }
+       orderDB.remove(orderId);
+       boolean found=false;
+       for(String k:partnerOrderDB.keySet()){
+           for(String order:partnerOrderDB.get(k)){
+               if(order==orderId){
+                   partnerOrderDB.get(k).remove(order);
+                   found=true;
+                   break;
+               }
+           }
+       }
+       if(!found){
+           orders--;
+       }
         return "Deleted";
     }
 }
